@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101d37">
+    <meta name="description" content="Directorio de servicios de salud en Cobija, Pando.">
+    <title>Cobija Salud — Directorio de servicios</title>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://tile.openstreetmap.org">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+    <link rel="stylesheet" href="./styles.css">
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script defer src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script type="module" src="./js/controller.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#" aria-label="Cobija Salud, inicio">
+          <span class="brand-mark" aria-hidden="true">+</span>
+          <span><strong>Cobija</strong><small>Salud</small></span>
+        </a>
+        <p class="brand-caption">Directorio de servicios<br>de salud de Cobija</p>
+
+        <nav class="side-nav" aria-label="Navegación principal">
+          <button class="nav-link is-active" data-category="all"><span>⌂</span> Inicio</button>
+          <button class="nav-link" data-category="farmacia"><span>✚</span> Farmacias</button>
+          <button class="nav-link" data-category="clinica"><span>✚</span> Clínicas y centros</button>
+          <button class="nav-link" data-category="laboratorio"><span>⌬</span> Laboratorios</button>
+          <button class="nav-link" data-category="ecografia"><span>◉</span> Ecografías</button>
+        </nav>
+
+        <div class="sidebar-note">
+          <span class="note-icon" aria-hidden="true">i</span>
+          <p>Los marcadores se muestran solo cuando la ubicación puede verificarse.</p>
+        </div>
+        <div class="sidebar-bottom">
+          <span class="outline-star" aria-hidden="true">✦</span>
+          <span>Cobija, Pando<br><small>Tu salud, nuestra prioridad</small></span>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <button class="mobile-menu" id="menu-toggle" type="button" aria-label="Abrir navegación" aria-expanded="false">☰</button>
+          <div class="page-heading">
+            <p class="eyebrow">PANDO · BOLIVIA</p>
+            <h1>Encuentra atención cerca de ti</h1>
+          </div>
+          <span class="location-pill"><span aria-hidden="true">●</span> Cobija</span>
+        </header>
+
+        <section class="search-panel" aria-label="Buscar servicios de salud">
+          <label class="search-box">
+            <span aria-hidden="true">⌕</span>
+            <input id="search-input" type="search" placeholder="Buscar por nombre, dirección o servicio…" autocomplete="off">
+            <kbd>⌘ K</kbd>
+          </label>
+          <button class="primary-button" id="search-button" type="button">Buscar <span aria-hidden="true">→</span></button>
+        </section>
+
+        <section class="stats-grid" aria-label="Resumen del directorio">
+          <article class="stat-card stat-total">
+            <span class="stat-icon" aria-hidden="true">⌂</span>
+            <div><strong id="count-total">—</strong><span>Establecimientos</span></div>
+          </article>
+          <article class="stat-card stat-pharmacy">
+            <span class="stat-icon" aria-hidden="true">✚</span>
+            <div><strong id="count-farmacia">—</strong><span>Farmacias</span></div>
+          </article>
+          <article class="stat-card stat-clinic">
+            <span class="stat-icon" aria-hidden="true">✚</span>
+            <div><strong id="count-clinica">—</strong><span>Clínicas y centros</span></div>
+          </article>
+          <article class="stat-card stat-lab">
+            <span class="stat-icon" aria-hidden="true">⌬</span>
+            <div><strong id="count-laboratorio">—</strong><span>Laboratorios</span></div>
+          </article>
+          <article class="stat-card stat-echo">
+            <span class="stat-icon" aria-hidden="true">◉</span>
+            <div><strong id="count-ecografia">—</strong><span>Ecografías</span></div>
+          </article>
+        </section>
+
+        <section class="filters-panel" aria-label="Filtros">
+          <div class="filters-title"><span aria-hidden="true">▽</span><strong>Filtrar resultados</strong><button id="clear-filters" class="text-button" type="button">Limpiar</button></div>
+          <div class="filter-fields">
+            <label>Categoría
+              <select id="category-filter">
+                <option value="all">Todas</option>
+                <option value="farmacia">Farmacia</option>
+                <option value="clinica">Clínica / centro médico</option>
+                <option value="laboratorio">Laboratorio</option>
+                <option value="ecografia">Ecografía</option>
+              </select>
+            </label>
+            <label>Servicio
+              <select id="service-filter"><option value="all">Todos</option></select>
+            </label>
+            <label>Sector
+              <select id="sector-filter">
+                <option value="all">Todos</option>
+                <option value="privado">Privado</option>
+                <option value="municipal">Municipal</option>
+                <option value="seguro_social">Seguro social</option>
+              </select>
+            </label>
+            <span class="filter-disclaimer">La información no confirmada se indica en cada ficha.</span>
+          </div>
+        </section>
+
+        <section class="workspace-grid">
+          <section class="results-panel" aria-labelledby="results-title">
+            <div class="section-heading">
+              <div><p class="eyebrow">DIRECTORIO LOCAL</p><h2 id="results-title">Establecimientos</h2></div>
+              <span class="result-count" id="result-count">— resultados</span>
+            </div>
+            <div class="results-list" id="results-list" aria-live="polite">
+              <div class="loading-state"><span class="spinner"></span> Cargando directorio…</div>
+            </div>
+          </section>
+
+          <section class="map-panel" aria-label="Mapa de establecimientos de salud en Cobija">
+            <div id="map" role="application" aria-label="Mapa interactivo de Cobija"></div>
+            <div class="map-overlay">
+              <span class="map-live-dot"></span>
+              <span><strong id="mapped-count">0</strong> ubicaciones verificadas</span>
+              <span id="map-selection-status" class="map-selection-status" hidden></span>
+            </div>
+            <div class="map-legend" aria-label="Leyenda del mapa">
+              <span><i class="legend-dot farmacia"></i> Farmacia</span>
+              <span><i class="legend-dot hospital"></i> Hospital</span>
+              <span><i class="legend-dot clinica"></i> Clínica</span>
+              <span><i class="legend-dot laboratorio"></i> Laboratorio</span>
+              <span><i class="legend-dot ecografia"></i> Ecografía</span>
+            </div>
+          </section>
+        </section>
+
+        <section class="detail-panel" id="detail-panel" aria-labelledby="detail-title">
+          <div class="detail-symbol" aria-hidden="true">✚</div>
+          <div class="detail-main">
+            <p class="eyebrow">FICHA DEL ESTABLECIMIENTO</p>
+            <h2 id="detail-title">Selecciona un establecimiento</h2>
+            <p id="detail-description" class="detail-muted">Elige una tarjeta para consultar la información disponible.</p>
+          </div>
+          <div class="detail-column">
+            <span class="detail-label">Dirección</span><strong id="detail-address">—</strong>
+            <span class="detail-label">Servicios</span><strong id="detail-services">—</strong>
+          </div>
+          <div class="detail-column">
+            <span class="detail-label">Teléfono</span><strong id="detail-phone">Por confirmar</strong>
+            <span class="detail-label">Horario</span><strong id="detail-hours">Por confirmar</strong>
+          </div>
+          <div class="detail-column detail-source">
+            <span class="detail-label">Fuente y actualización</span><strong id="detail-source">—</strong>
+            <a id="detail-source-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Consultar fuente ↗</a>
+          </div>
+        </section>
+
+        <details class="location-admin" id="location-admin">
+          <summary>Revisar y corregir ubicaciones</summary>
+          <div class="location-admin-content">
+            <p class="admin-intro">Las búsquedas automáticas solo sugieren lugares; no los marcan como verificados. Las correcciones se guardan en este navegador. Exporta el JSON para incorporarlas al directorio. Geocodificación <a href="https://nominatim.org/release-docs/latest/api/Overview/" target="_blank" rel="noopener noreferrer">Nominatim</a> · datos © OpenStreetMap contributors.</p>
+            <div class="geo-audit-summary" id="geo-audit-summary" aria-live="polite"></div>
+            <div class="admin-form-grid">
+              <label>Establecimiento
+                <select id="geo-record-select"></select>
+              </label>
+              <div class="admin-record-meta" id="geo-record-meta"></div>
+              <label>Latitud
+                <input id="geo-lat" inputmode="decimal" type="number" step="any" placeholder="-11.0">
+              </label>
+              <label>Longitud
+                <input id="geo-lon" inputmode="decimal" type="number" step="any" placeholder="-68.7">
+              </label>
+              <label class="admin-wide">Fuente que respalda este punto
+                <input id="geo-source" type="text" placeholder="Enlace o referencia verificable">
+              </label>
+              <label>Fecha de verificación
+                <input id="geo-date" type="date">
+              </label>
+              <label>Precisión conocida
+                <input id="geo-precision" type="text" placeholder="Ej.: centro de edificio OSM">
+              </label>
+              <label class="verification-check admin-wide">
+                <input id="geo-confirmed" type="checkbox">
+                Confirmé manualmente que el punto coincide con la fuente indicada
+              </label>
+            </div>
+            <div class="admin-actions">
+              <button id="geo-search" class="secondary-button" type="button">Buscar en Nominatim</button>
+              <button id="geo-pick-map" class="secondary-button" type="button">Elegir punto en el mapa</button>
+              <a id="geo-open-osm" class="secondary-button" href="https://www.openstreetmap.org/" target="_blank" rel="noopener noreferrer">Abrir en OpenStreetMap</a>
+              <button id="geo-save" class="primary-button" type="button">Guardar corrección local</button>
+              <button id="geo-export" class="secondary-button" type="button">Exportar JSON actualizado</button>
+            </div>
+            <p id="geo-admin-message" class="admin-message" role="status"></p>
+            <div id="geo-candidates" class="geo-candidates" aria-live="polite"></div>
+          </div>
+        </details>
+
+        <footer class="page-footer">
+          <span>Directorio informativo · No sustituye una consulta médica.</span>
+          <span>Mapa © OpenStreetMap contributors</span>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
